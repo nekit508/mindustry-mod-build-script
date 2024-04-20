@@ -10,21 +10,24 @@ import com.nekit508.updater.Updater;
 
 public class Copy extends Part {
     Seq<RemoteFile> files = new Seq<>();
-    boolean shouldUpdate = true;
+    boolean shouldUpdate = true, forced = false;
     Fi versionConfig;
 
     String latestVersion, currentVersion;
 
+    public Copy() {
+        name = "copy";
+        Updater.parsers.add(new Updater.ArgParser("force", a -> forced = true));
+    }
+
     @Override
     public void setup() {
         versionConfig = Updater.configDir.child("copy/version");
-
         currentVersion = versionConfig.exists() ? versionConfig.readString() : "";
-
         JsonValue value = GHApi.branchInfo(Updater.repo, Updater.branch);
         latestVersion = value.get("commit").get("sha").asString();
 
-        shouldUpdate = !latestVersion.equals(currentVersion);
+        shouldUpdate = !latestVersion.equals(currentVersion) || forced;
     }
 
     @Override
@@ -36,17 +39,17 @@ public class Copy extends Part {
     @Override
     public void handle() {
         if (shouldUpdate) {
-            Fi fi = Updater.localRoot.child("dick");
-            fi.mkdirs();
+            Fi fi = Updater.localRoot;
 
-            Log.info("Writing files...");
+            Log.info("Writing files @...", forced ? "(forced)" : "");
             Updater.logger.set("\r");
             files.each(f -> {
                 Log.info(f.relativePath);
                 f.getFi(fi).write(f.stream(), false);
             });
             Updater.logger.pop();
-            Log.info("Wrote new version @.", latestVersion);
+
+            Log.info("Wrote version @.", latestVersion);
         } else {
             Log.info("Up to date.");
         }

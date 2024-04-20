@@ -37,14 +37,15 @@ public class Updater {
         Log.logger = logger;
 
         new Seq<>(args).each(s -> {
-            if (s.startsWith("-") && s.contains("=")) {
+            if (s.startsWith("-")) {
                 int sep = s.indexOf("=");
-                Updater.args.put(s.substring(1, sep), s.substring(sep+1));
+                Updater.args.put(sep != -1 ? s.substring(1, sep) : s.substring(1), sep != -1 ? s.substring(sep+1) : "true");
             }
         });
 
         parts.add(new Copy());
 
+        Log.info("Loaded parts: " + parts.map(Part::name));
         // setup (settings resolving and arguments parsing)
         parseArgs();
         parts.each(Part::setup);
@@ -71,7 +72,7 @@ public class Updater {
         configDir.mkdirs();
     }
 
-    static class ArgParser {
+    public static class ArgParser {
         public String arg;
         public Cons<String> handler;
         public Runnable dontExists = () -> {};
