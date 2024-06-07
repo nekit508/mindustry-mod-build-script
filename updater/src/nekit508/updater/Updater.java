@@ -3,6 +3,7 @@ package nekit508.updater;
 import arc.files.Fi;
 import arc.struct.Seq;
 import arc.util.Log;
+import arc.util.Strings;
 import arc.util.serialization.JsonReader;
 import arc.util.serialization.JsonValue;
 import nekit508.updater.log.Logger;
@@ -25,10 +26,13 @@ public class Updater {
     public static Fi root = new Fi("");
     public static GitHub gitHub;
 
+    public static Seq<LuaValue> forRun = new Seq<>();
+    public static Seq<String> loaded = new Seq<>();
+
     public static void main(String[] args) {
         Log.logger = logger;
         try {
-            gitHub = GitHub.connectAnonymously();
+            gitHub = System.getenv().containsKey("GITHUB") ? GitHub.connect() : GitHub.connectAnonymously();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -38,11 +42,13 @@ public class Updater {
         Fi G = internalFileTree.child("G.lua");
         globals.load(G.reader(), "G");
 
-        Seq<String> forLoad = Seq.with("nekit508/mindustry-mod-build-script/any-remote/any-ext");
-        Seq<LuaValue> forRun = forLoad.map(dep -> {
+        loaded = Seq.with("nekit508/mindustry-mod-build-script/any-remote/core");
+        forRun = loaded.map(dep -> {
             String[] path = dep.split("[\\\\/]", 3);
 
             try {
+                Log.info("Loading @.", dep);
+
                 GHRepository repo = gitHub.getRepository(path[0] + "/" + path[1]);
                 GHContent info = repo.getFileContent(path[2] + "/info.json");
                 JsonValue infoJ = jsonReader.parse(info.read());
@@ -50,24 +56,24 @@ public class Updater {
                 String name = infoJ.get("name").asString();
                 if (infoJ.has("dependencies")) {
                     String[] deps = infoJ.get("dependencies").asStringArray();
-                    forLoad.addAll(deps);
+                    loaded.addAll(deps);
                 }
-                String main = infoJ.get("main-file").asString();
+                String main = infoJ.get("main").asString();
                 GHContent mainF = repo.getFileContent(path[2] + "/" + main);
 
                 return globals.load(new InputStreamReader(mainF.read()), name);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                Log.err("Error due loading @.", dep);
+                return globals.load(Strings.format("print(\"Err @\")", dep), "err");
             }
         }).reverse();
-        forRun.each(run -> globals.call(run));
 
         Log.info("Waiting for commands");
         try {
             boolean running = true;
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             while (running) {
-                Log.info(">>> ");
+                System.out.print(">>> ");
                 String[] command = reader.readLine().split("[\t ]");
                 if (command.length == 0)
                     continue;
@@ -84,6 +90,8 @@ public class Updater {
                             root = root.child(path);
                     }
                     Log.info("Root now is @.", root.absolutePath());
+                } else if (command[0].equals("start")) {
+                    forRun.each(LuaValue::call);
                 }
             }
         } catch (Exception e) {

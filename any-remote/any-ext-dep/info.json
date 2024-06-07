@@ -1,4 +1,4 @@
 {
     "name": "ext-dep-name",
-    "main-file": "another.lua"
+    "main": "another.lua"
 }
