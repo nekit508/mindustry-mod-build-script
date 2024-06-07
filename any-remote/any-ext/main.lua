@@ -1,1 +1,1 @@
-require("ext-dep-name")
+ext_dep:extFunc("Hello")
