@@ -1,1 +1,1 @@
-ext_dep:extFunc("Hello")
+ext_dep.extFunc("Hello")

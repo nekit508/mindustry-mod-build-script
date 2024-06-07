@@ -27,9 +27,8 @@ public class Updater {
 
     public static void main(String[] args) {
         Log.logger = logger;
-
         try {
-            gitHub = GitHub.connect();
+            gitHub = GitHub.connectAnonymously();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -49,8 +48,10 @@ public class Updater {
                 JsonValue infoJ = jsonReader.parse(info.read());
 
                 String name = infoJ.get("name").asString();
-                String[] deps = infoJ.get("dependencies").asStringArray();
-                forLoad.addAll(deps);
+                if (infoJ.has("dependencies")) {
+                    String[] deps = infoJ.get("dependencies").asStringArray();
+                    forLoad.addAll(deps);
+                }
                 String main = infoJ.get("main-file").asString();
                 GHContent mainF = repo.getFileContent(path[2] + "/" + main);
 
