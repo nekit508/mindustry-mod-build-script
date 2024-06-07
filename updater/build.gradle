@@ -23,6 +23,7 @@ project.tasks.compileJava { JavaCompile task ->
 project.dependencies {
     implementation "com.github.Anuken.Arc:arc-core:v146"
     implementation "org.luaj:luaj-jse:3.0.1"
+    implementation "org.kohsuke:github-api:1.321"
 }
 
 project.tasks.create("copyJar") { Task task ->
