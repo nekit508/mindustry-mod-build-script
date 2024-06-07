@@ -1,4 +1,4 @@
-package com.nekit508.updater;
+package nekit508.updater;
 
 import arc.files.Fi;
 

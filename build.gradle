@@ -8,9 +8,6 @@ project.plugins.apply("java")
 project.plugins.apply("idea")
 project.plugins.apply("maven-publish")
 
-// src - java sources
-// gen - generated java sources
-// res - resources (e.g. assets)
 project.sourceSets.main.java.srcDirs = [
         "src", "gen"
 ]
@@ -25,11 +22,7 @@ project.tasks.compileJava { JavaCompile task ->
 
 project.dependencies {
     implementation "com.github.Anuken.Arc:arc-core:v146"
-}
-
-project.tasks.withType(JavaCompile) { JavaCompile task ->
-    /*task.targetCompatibility = JavaVersion.VERSION_20
-    task.sourceCompatibility = JavaVersion.VERSION_20*/
+    implementation "org.luaj:luaj-jse:3.0.1"
 }
 
 project.tasks.create("copyJar") { Task task ->

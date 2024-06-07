@@ -1,4 +1,4 @@
-package com.nekit508.updater.log;
+package nekit508.updater.log;
 
 import arc.struct.Seq;
 import arc.util.Log;
