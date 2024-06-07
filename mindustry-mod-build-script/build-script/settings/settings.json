@@ -1,0 +1,15 @@
+{
+    "projectSettings": {
+        "version": "version",
+        "group": "owner/repo"
+    },
+
+    "dependencies": {
+        "useJitpackForMindustryDependency": false,
+        "mindustryVersion": "v146"
+    },
+
+    "extensions":[
+        "mindustry-mod"
+    ]
+}
