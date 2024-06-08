@@ -1,5 +1,3 @@
-G = {}
-
 function G.java(className)
     return luajava.bindClass(className)
 end
@@ -9,11 +7,11 @@ function G.inst(className, args)
 end
 
 function G.waitLineInput()
-    return G.stdinReader:readLine()
+    return G.stdin:readLine()
 end
 
 function G.info(message)
-    G.log:info(message)
+    G.log:info(message, nil)
 end
 
 function G.err(message)
@@ -24,5 +22,5 @@ function G.warn(message)
     G.log:warn(message)
 end
 
-G.stdinReader = G.inst("java.io.BufferedReader", STDIN)
-G.log = G.java("arc.utils.Log")
+G.log = G.java("arc.util.Log")
+G.updater = G.java("nekit508.updater.Updater")

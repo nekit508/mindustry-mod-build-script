@@ -11,10 +11,13 @@ import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.luaj.vm2.Globals;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaUserdata;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -38,9 +41,14 @@ public class Updater {
         }
 
         globals = JsePlatform.standardGlobals();
+        globals.STDIN = System.in;
 
+        globals.set("G", new LuaTable());
+        globals.get("G").set("stdin", new LuaUserdata(globals.STDIN));
+        globals.get("G").set("stdout", new LuaUserdata(globals.STDOUT));
+        globals.get("G").set("stderr", new LuaUserdata(globals.STDERR));
         Fi G = internalFileTree.child("G.lua");
-        globals.load(G.reader(), "G");
+        globals.load(G.reader(), "G").call();
 
         loaded = Seq.with("nekit508/mindustry-mod-build-script/any-remote/core");
         forRun = loaded.map(dep -> {
