@@ -1,4 +1,4 @@
-G.gdj()
+G.input()
 info("Current root is " .. G.updater.root:absolutePath())
 G.info("Start files processing? Y/n")
 
