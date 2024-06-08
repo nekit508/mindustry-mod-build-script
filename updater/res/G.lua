@@ -6,7 +6,7 @@ function G.inst(className, args)
     return luajava.newInstance(className, args)
 end
 
-function G.waitLineInput()
+function G.input()
     return G.stdin:readLine()
 end
 
