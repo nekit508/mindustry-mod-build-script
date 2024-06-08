@@ -17,8 +17,6 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
 import java.io.BufferedReader;
-import java.io.Console;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Updater {
