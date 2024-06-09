@@ -6,7 +6,7 @@ function process()
     value = json:get("repo"):asString()
 
     G.info(value)
-    G.info(type(value))
+    G.info(type(json))
 
     path = value:split("[\\\\/]", 3)
     repo = G.updater.github:getRepository(path[1] .. "/" .. path[2])
