@@ -16,7 +16,9 @@ import org.luaj.vm2.LuaUserdata;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class Updater {
@@ -30,6 +32,8 @@ public class Updater {
     public static Seq<LuaValue> forRun = new Seq<>();
     public static Seq<String> loaded = new Seq<>();
 
+    public static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
     public static void main(String[] args) {
         Log.logger = logger;
         try {
@@ -39,12 +43,7 @@ public class Updater {
         }
 
         globals = JsePlatform.standardGlobals();
-        globals.STDIN = System.in;
 
-        globals.set("G", new LuaTable());
-        globals.get("G").set("stdin", new LuaUserdata(globals.STDIN));
-        globals.get("G").set("stdout", new LuaUserdata(globals.STDOUT));
-        globals.get("G").set("stderr", new LuaUserdata(globals.STDERR));
         Fi G = internalFileTree.child("G.lua");
         globals.load(G.reader(), "G").call();
 
@@ -77,7 +76,6 @@ public class Updater {
         Log.info("Waiting for commands");
         try {
             boolean running = true;
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             while (running) {
                 System.out.print(">>> ");
                 String[] command = reader.readLine().split("[\t ]");

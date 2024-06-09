@@ -1,13 +1,13 @@
-function G.java(className)
+if G == nil then
+    G = {}
+end
+
+function G.bind(className)
     return luajava.bindClass(className)
 end
 
-function G.inst(className, args)
-    return luajava.newInstance(className, args)
-end
-
 function G.input()
-    return G.stdin:readLine()
+    return G.updater.reader:readLine()
 end
 
 function G.info(message)
@@ -22,5 +22,6 @@ function G.warn(message)
     G.log:warn(message)
 end
 
-G.log = G.java("arc.util.Log")
-G.updater = G.java("nekit508.updater.Updater")
+G.log = G.bind("arc.util.Log")
+G.updater = G.bind("nekit508.updater.Updater")
+
