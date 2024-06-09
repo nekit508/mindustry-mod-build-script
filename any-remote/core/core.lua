@@ -4,6 +4,10 @@ G.info("Start files processing? Y/n")
 function process()
     json = G.updater.jsonReader:parse(G.updater.root:child("updater.json"))
     value = json:get("repo"):asString()
+
+    G.info(value)
+    G.info(type(value))
+
     path = value:split("[\\\\/]", 3)
     repo = G.updater.github:getRepository(path[1] .. "/" .. path[2])
 

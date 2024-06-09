@@ -83,7 +83,7 @@ public class Updater {
                     continue;
                 if (command[0].equals("exit"))
                     running = false;
-                else if (command[0].equals("chmod")) {
+                else if (command[0].equals("chroot")) {
                     if (command.length > 1) {
                         String path = command[1];
                         if (path.startsWith("/"))
