@@ -3,15 +3,11 @@ G.info("Start files processing? Y/n")
 
 function process()
     json = G.updater.jsonReader:parse(G.updater.root:child("updater.json"))
-    value = json:get("repo"):asString()
+    repoPath = json:get("repo"):asString()
+    dir = json:get("dir"):asString()
 
-    G.info(value)
-    G.info(type(json))
-
-    path = value:split("[\\\\/]", 3)
-    repo = G.updater.github:getRepository(path[1] .. "/" .. path[2])
-
-    files = repo:getDirectoryContent(path[3])
+    repo = G.updater.github:getRepository(repoPath)
+    files = repo:getDirectoryContent(dir)
 
     for file in files do
         G.info(file)
@@ -22,3 +18,4 @@ resp = G.input()
 if resp == "y" or resp == "Y" then
     process()
 end
+
