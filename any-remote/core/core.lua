@@ -6,7 +6,7 @@ function process()
     repoPath = json:get("repo"):asString()
     dir = json:get("dir"):asString()
 
-    repo = G.updater.github:getRepository(repoPath)
+    repo = G.updater.gitHub:getRepository(repoPath)
     files = repo:getDirectoryContent(dir)
 
     for file in files do
