@@ -1,5 +1,0 @@
-{
-    "name": "ext-name",
-    "dependencies": ["nekit508/mindustry-mod-build-script/any-remote/any-ext-dep"],
-    "main": "main.lua"
-}

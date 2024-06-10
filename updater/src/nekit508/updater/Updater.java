@@ -16,10 +16,12 @@ import org.luaj.vm2.LuaUserdata;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
+import javax.tools.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Locale;
 
 public class Updater {
     public static JsonReader jsonReader = new JsonReader();
@@ -28,9 +30,6 @@ public class Updater {
     public static InternalFileTree internalFileTree = new InternalFileTree(Updater.class);
     public static Fi root = new Fi("");
     public static GitHub gitHub;
-
-    public static Seq<LuaValue> forRun = new Seq<>();
-    public static Seq<String> loaded = new Seq<>();
 
     public static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
@@ -42,36 +41,7 @@ public class Updater {
             throw new RuntimeException(e);
         }
 
-        globals = JsePlatform.standardGlobals();
-
-        Fi G = internalFileTree.child("G.lua");
-        globals.load(G.reader(), "G").call();
-
-        loaded = Seq.with("nekit508/mindustry-mod-build-script/any-remote/core");
-        forRun = loaded.map(dep -> {
-            String[] path = dep.split("[\\\\/]", 3);
-
-            try {
-                Log.info("Loading @.", dep);
-
-                GHRepository repo = gitHub.getRepository(path[0] + "/" + path[1]);
-                GHContent info = repo.getFileContent(path[2] + "/info.json");
-                JsonValue infoJ = jsonReader.parse(info.read());
-
-                String name = infoJ.get("name").asString();
-                if (infoJ.has("dependencies")) {
-                    String[] deps = infoJ.get("dependencies").asStringArray();
-                    loaded.addAll(deps);
-                }
-                String main = infoJ.get("main").asString();
-                GHContent mainF = repo.getFileContent(path[2] + "/" + main);
-
-                return globals.load(new InputStreamReader(mainF.read()), name);
-            } catch (Exception e) {
-                Log.err("Error due loading @.", dep);
-                return globals.load(Strings.format("print(\"Err @\")", dep), "err");
-            }
-        }).reverse();
+        Seq<Runnable> forRun = load(Seq.with("nekit508/mindustry-mod-build-script/any-remote/core"));
 
         Log.info("Waiting for commands");
         try {
@@ -95,9 +65,53 @@ public class Updater {
                     }
                     Log.info("Root now is @.", root.absolutePath());
                 } else if (command[0].equals("start")) {
-                    forRun.each(LuaValue::call);
+                    forRun.each(Runnable::run);
                 }
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Seq<Runnable> load(Seq<String> forLoad) {
+        try {
+            Seq<Runnable> out = new Seq<>();
+
+            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+            DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
+
+            for (String dep : forLoad) {
+                Log.info("Loading @.", dep);
+                // user/repo/path
+                String[] path = dep.split("[\\\\/]", 3);
+                GHRepository repo = gitHub.getRepository(path[0] + "/" + path[1]);
+
+                GHContent infoContent = repo.getFileContent(path[2] + "/info.json");
+                JsonValue info = jsonReader.parse(infoContent.read());
+                String[] deps = info.get("dependencies").asStringArray();
+                for (String s : deps) {
+                    forLoad.add(s);
+                }
+
+                String mainFileName = info.get("main").asString();
+                NetJavaFileObject javaFileObject = new NetJavaFileObject();
+                javaFileObject.file = mainFileName;
+                javaFileObject.path = path[2];
+                javaFileObject.provider = repo;
+                Seq<JavaFileObject> forCompile = Seq.with(javaFileObject);
+
+                Log.info("    compile java.");
+                JavaCompiler.CompilationTask task = compiler.getTask(null, null, diagnosticCollector, null, null, forCompile);
+                task.call();
+
+                for (Diagnostic<? extends JavaFileObject> diagnostic : diagnosticCollector.getDiagnostics()) {
+                    Log.info(diagnostic.getMessage(Locale.getDefault()));
+                }
+                Log.info("    [OK]");
+                Log.info("    @ compiled classes @.", deps, forCompile);
+            }
+
+            return out.reverse();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

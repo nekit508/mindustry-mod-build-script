@@ -1,4 +1,4 @@
 {
     "name": "core",
-    "main": "core.lua"
+    "main": "Core.java"
 }
