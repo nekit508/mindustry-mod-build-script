@@ -9,9 +9,9 @@ function process()
     repo = G.updater.gitHub:getRepository(repoPath)
     files = repo:getDirectoryContent(dir)
 
-    for file in files do
+    files:forEach(function(file)
         G.info(file)
-    end
+    end)
 end
 
 resp = G.input()
